@@ -52,7 +52,7 @@ export default function HabitDetail() {
   return (
     <ScrollView className="flex-1 bg-[#121212]" showsVerticalScrollIndicator={false}>
       {/* Hero section — fills the screen, only header + timer visible before scrolling */}
-      <View style={{ minHeight: height - 20 }} className="px-5 pt-16">
+      <View style={{ minHeight: height + 80 }} className="px-5 pt-16">
         <View className="flex-row items-center mb-1">
           <Pressable
             onPress={() => router.back()}
