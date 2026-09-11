@@ -1,10 +1,12 @@
 import { router } from "expo-router";
 import { Pressable, Text, View } from "react-native";
+import { getTier } from "../lib/levels";
 import { Habit } from "../lib/types";
 import { useElapsed } from "../lib/useElapsed";
 
 export function HabitCard({ habit }: { habit: Habit }) {
   const { days, hours } = useElapsed(habit.startTimestamp);
+  const tier = getTier(days);
 
   return (
     <Pressable
@@ -21,6 +23,7 @@ export function HabitCard({ habit }: { habit: Habit }) {
       <Text className="text-amber-500 text-4xl font-semibold mt-3">
         {days}d {hours}h
       </Text>
+      <Text className="text-gray-500 text-xs mt-2 uppercase tracking-wide">{tier.label}</Text>
     </Pressable>
   );
 }

@@ -60,8 +60,13 @@ export default function HabitDetail() {
           >
             <Text className="text-white text-lg">‹</Text>
           </Pressable>
-          <View>
-            <Text className="text-white text-xl font-bold">{habit.name}</Text>
+          <View className="flex-1">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-white text-xl font-bold">{habit.name}</Text>
+              <Pressable onPress={() => router.push(`/habit/edit?id=${habit.id}`)} className="px-2">
+                <Text className="text-gray-500 text-xs">Edit</Text>
+              </Pressable>
+            </View>
             {habit.note ? <Text className="text-gray-500 text-xs mt-1">{habit.note}</Text> : null}
           </View>
         </View>

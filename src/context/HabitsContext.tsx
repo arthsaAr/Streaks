@@ -1,4 +1,9 @@
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
+import {
+  cancelMilestoneNotifications,
+  requestNotificationPermission,
+  scheduleMilestoneNotifications,
+} from "../lib/notifications";
 import { loadHabits, saveHabits } from "../lib/storage";
 import { Habit } from "../lib/types";
 
@@ -6,6 +11,7 @@ type HabitsContextType = {
   habits: Habit[];
   loading: boolean;
   addHabit: (name: string, note: string, startTimestamp: number) => Promise<void>;
+  updateHabit: (id: string, name: string, note: string) => Promise<void>;
   resetHabit: (id: string) => Promise<void>;
   setStartTime: (id: string, timestamp: number) => Promise<void>;
   deleteHabit: (id: string) => Promise<void>;
@@ -23,6 +29,7 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
       setHabits(h);
       setLoading(false);
     });
+    requestNotificationPermission();
   }, []);
 
   const persist = useCallback(async (next: Habit[]) => {
@@ -40,6 +47,15 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
         pastStreaks: [],
       };
       await persist([newHabit, ...habits]);
+      scheduleMilestoneNotifications(newHabit);
+    },
+    [habits, persist]
+  );
+
+  const updateHabit = useCallback(
+    async (id: string, name: string, note: string) => {
+      const next = habits.map((h) => (h.id === id ? { ...h, name, note } : h));
+      await persist(next);
     },
     [habits, persist]
   );
@@ -47,30 +63,39 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
   const resetHabit = useCallback(
     async (id: string) => {
       const now = Date.now();
-      const next = habits.map((h) =>
-        h.id !== id
-          ? h
-          : {
-              ...h,
-              startTimestamp: now,
-              pastStreaks: [{ start: h.startTimestamp, end: now }, ...h.pastStreaks],
-            }
-      );
+      let updated: Habit | undefined;
+      const next = habits.map((h) => {
+        if (h.id !== id) return h;
+        updated = {
+          ...h,
+          startTimestamp: now,
+          pastStreaks: [{ start: h.startTimestamp, end: now }, ...h.pastStreaks],
+        };
+        return updated;
+      });
       await persist(next);
+      if (updated) scheduleMilestoneNotifications(updated);
     },
     [habits, persist]
   );
 
   const setStartTime = useCallback(
     async (id: string, timestamp: number) => {
-      const next = habits.map((h) => (h.id === id ? { ...h, startTimestamp: timestamp } : h));
+      let updated: Habit | undefined;
+      const next = habits.map((h) => {
+        if (h.id !== id) return h;
+        updated = { ...h, startTimestamp: timestamp };
+        return updated;
+      });
       await persist(next);
+      if (updated) scheduleMilestoneNotifications(updated);
     },
     [habits, persist]
   );
 
   const deleteHabit = useCallback(
     async (id: string) => {
+      await cancelMilestoneNotifications(id);
       await persist(habits.filter((h) => h.id !== id));
     },
     [habits, persist]
@@ -80,7 +105,16 @@ export function HabitsProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <HabitsContext.Provider
-      value={{ habits, loading, addHabit, resetHabit, setStartTime, deleteHabit, getHabit }}
+      value={{
+        habits,
+        loading,
+        addHabit,
+        updateHabit,
+        resetHabit,
+        setStartTime,
+        deleteHabit,
+        getHabit,
+      }}
     >
       {children}
     </HabitsContext.Provider>
