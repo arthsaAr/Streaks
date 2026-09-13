@@ -113,6 +113,8 @@ See [Expo's Android deployment docs](https://docs.expo.dev/deploy/build-project/
 
 Issues and pull requests are welcome. For major changes, please open an issue first to discuss what you'd like to change.
 
+This project also served as a hands-on way to learn the full build-and-deployment process — from scaffolding an Expo app to publishing on the Google Play Store — which is why the initial feature set is intentionally basic.
+
 ## License
 
 [MIT](LICENSE)
