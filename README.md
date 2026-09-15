@@ -100,8 +100,6 @@ eas build:configure
 eas build --platform android --profile production
 ```
 
-See [Expo's Android deployment docs](https://docs.expo.dev/deploy/build-project/) for the full submission flow to Google Play.
-
 ## Roadmap
 
 - [ ] Home screen widget
